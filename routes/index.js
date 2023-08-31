@@ -1,9 +1,10 @@
 var express = require('express');
-//const cors = require('cors');//lỗi CORS
+const cors = require('cors');//lỗi CORS
 var router = express.Router();
 const sql = require("../dboperation");//load file dboperation
 const bodyParser = require('body-parser');//phương thức POST
 
+router.use(cors());
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'APPLE4CAR' });
