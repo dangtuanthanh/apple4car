@@ -154,7 +154,7 @@ router.post('/uploadAnhXe/:MaXe', newupload.single('image'), (req, res) => {
   const MaXe = req.params.MaXe;
   const imagePath = req.file.path;
   //const domain = 'http://localhost:3000';
-  const domain = 'http://' + req.hostname + ':' + req.app.get('port');
+  const domain = 'http://' + req.hostname
   const newPath = path.relative('public', imagePath);
   const imagePathWithDomain = path.join(domain,newPath);
 
