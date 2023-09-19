@@ -213,4 +213,56 @@ router.post("/thongtin", function (req, res, next) {
       res.status(500).json({ success: false, message: "Lỗi khi gửi thông tin", error });
     });
 });
+//todo: lấy dữ liệu thông tin liên hệ 
+router.get("/getcontact", function (req, res, next) {
+  sql.getcontact().then((result) => {
+    res.json(result);
+  });
+});
+//todo Đường dẫn api trả thông tin xe
+router.get("/thongtinxe", function (req, res, next) {
+  sql.getThongTinXe().then((result) => {
+    res.json(result);
+  });
+});
+
+//todo Xuất thông tin theo id
+router.get("/contact/:id", function (req, res, next) {
+  const idContact = req.params.id; // Lấy id contact từ tham số đường dẫn
+
+  sql
+    .contact(idContact)
+    .then((result) => {
+      if (result.length > 0) {
+        res.json(result[0]); // Chỉ xuất ra dữ liệu của phần tử đầu tiên trong kết quả
+      } else {
+        res
+          .status(404)
+          .json({ error: "Không tìm thấy thông tin liên hệ với id " + idContact });
+      }
+    })
+    .catch((error) => {
+      console.log("Lỗi Tải Dữ Liệu Contact: " + error);
+      res.status(500).json({ error: "Lỗi Tải Dữ Liệu Contact" });
+    });
+});
+//todo: api xử lý giá tự động tăng theo ngày
+router.get('/gia/:numberOfDays/:maLoaiXe', async (req, res) => {
+  const numberOfDays = parseInt(req.params.numberOfDays);
+  const maLoaiXe = parseInt(req.params.maLoaiXe);
+
+  try {
+    // Gọi hàm xử lý lấy giá thuê xe
+    const gia = await sql.getgia(numberOfDays, maLoaiXe);
+
+    // Định dạng giá thuê là "VND"
+    const giaFormatted = gia.toLocaleString('en-US', { style: 'currency', currency: 'VND' });
+
+    // Trả về giá thuê
+    res.json({ gia: giaFormatted });
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 module.exports = router;
