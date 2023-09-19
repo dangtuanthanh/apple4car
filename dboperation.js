@@ -260,7 +260,7 @@ let transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'dangtuanthanh265@gmail.com',
-    pass: 'bmja spfm sgqh pmhp' // Sử dụng biến môi trường EMAIL_PASSWORD
+    pass: process.env.EMAIL_PASSWORD // Sử dụng biến môi trường EMAIL_PASSWORD
   }
 });
 // Hàm gửi thông tin của người dùng
