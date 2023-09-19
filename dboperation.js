@@ -302,6 +302,80 @@ async function thongtin(data) {
     sql.close();
   }
 }
+// Hàm xuất thông tin theo idid
+async function contact(idContact) {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("idContact", sql.Int, idContact)
+      .query(
+        "SELECT [HoTen], [Email], [DiemNhan], [NgayNhan], [DiemTra], [NgayTra] FROM [dbo].[ThongTin] WHERE [ID] = @idContact"
+      );
+
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu Contact: " + error);
+    throw error;
+  } finally {
+    sql.close();
+  }
+}
+// Hàm xuất thông tin liên hệ
+async function getcontact() {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool.request().query("SELECT * FROM Thongtin");
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu Xe: " + error);
+  } finally {
+    sql.close();
+  }
+}
+// Hàm tính toán giá thuê xe dựa trên số ngày thuê
+// Hàm xử lý lấy giá thuê xe dựa trên số ngày thuê và mã loại xe
+async function getgia(numberOfDays, maLoaiXe) {
+  try {
+    // Kết nối cơ sở dữ liệu
+    await sql.connect(config);
+
+    // Truy vấn giá thuê xe dựa trên số ngày thuê và mã loại xe
+    const query = `
+      SELECT Gia
+      FROM DICHVU
+      WHERE NgayThue <= GETDATE() AND MaLoaiXe = @MaLoaiXe
+      ORDER BY NgayThue DESC
+    `;
+
+    const request = new sql.Request();
+    request.input('MaLoaiXe', sql.Int, maLoaiXe);
+
+    const result = await request.query(query);
+
+    // Tính giá thuê dựa trên số ngày thuê
+    const gia = result.recordset[0].Gia * numberOfDays;
+    return gia;
+  } catch (err) {
+    console.log('Lỗi truy vấn cơ sở dữ liệu:', err);
+    throw new Error('Lỗi truy vấn cơ sở dữ liệu');
+  }
+}
+
+//todo Hàm xử lý riêng để lấy thông tin xe và giá dịch vụ
+async function getThongTinXe() {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool.request().query("SELECT XE.*, DICHVU.Gia   FROM XE INNER JOIN DICHVU ON XE.MaLoaiXe = DICHVU.MaLoaiXe");
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu Xe: " + error);
+  } finally {
+    sql.close();
+  }
+}
+
+
 module.exports = {
   layxe: layxe,
   layuser: layuser,
@@ -314,5 +388,9 @@ module.exports = {
   themSuaAnhXe: themSuaAnhXe,
   xoauser: xoauser,
   suaThongTinUser: suaThongTinUser,
-  thongtin, thongtin
+  thongtin:thongtin,
+  contact: contact,
+  getgia: getgia,
+  getcontact:getcontact,
+  getThongTinXe:getThongTinXe,
 };
