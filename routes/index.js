@@ -163,12 +163,12 @@ router.post('/uploadAnhXe/:MaXe', newupload.single('image'), (req, res) => {
     .then(() => {
       res
         .status(200)
-        .json({ success: true, message: "Cập nhật ảnh xe thành công" });
+        .json({ success: true, message: "Cập nhật thông tin thành công" });
     })
     .catch((error) => {
       res
         .status(500)
-        .json({ success: false, message: "Lỗi khi Cập nhật ảnh xe", error });
+        .json({ success: false, message: "Lỗi khi Cập nhật thông tin", error });
     });
   
 });
