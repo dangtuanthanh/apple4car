@@ -163,12 +163,12 @@ router.post('/uploadAnhXe/:MaXe', newupload.single('image'), (req, res) => {
     .then(() => {
       res
         .status(200)
-        .json({ success: true, message: "Cập nhật thông tin thành công" });
+        .json({ success: true, message: "Cập nhật ảnh xe thành công" });
     })
     .catch((error) => {
       res
         .status(500)
-        .json({ success: false, message: "Lỗi khi Cập nhật thông tin", error });
+        .json({ success: false, message: "Lỗi khi Cập nhật ảnh xe", error });
     });
   
 });
@@ -262,6 +262,26 @@ router.get('/gia/:numberOfDays/:maLoaiXe', async (req, res) => {
     res.json({ gia: giaFormatted });
   } catch (err) {
     res.status(500).send(err.message);
+  }
+});
+
+//tìm kiếm dữ liệu
+router.get('/timkiemxe/:TenBang/:ColumnName/:Search', function (req, res, next) {
+  try {
+    const TenBang = req.params.TenBang;
+    const columnName = req.params.ColumnName;
+    const Search = req.params.Search;
+    const encodedSearch = encodeURIComponent(Search); // Mã hóa chuỗi tìm kiếm( mã hoá cả tiếng Việt)
+
+    sql.searchData(TenBang,columnName,encodedSearch ).then((result) => {//gọi hàm searchData
+      res.status(200).json(result);
+    }).catch((error) => {
+      console.log(error);
+    });;
+
+  } catch (error) {
+    console.log("Error: " + error.message);
+    res.sendStatus(500);
   }
 });
 
