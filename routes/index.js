@@ -266,7 +266,7 @@ router.get('/gia/:numberOfDays/:maLoaiXe', async (req, res) => {
 });
 
 //tìm kiếm dữ liệu
-router.get('/timkiemxe/:TenBang/:ColumnName/:Search', function (req, res, next) {
+router.get('/timkiem/:TenBang/:ColumnName/:Search', function (req, res, next) {
   try {
     const TenBang = req.params.TenBang;
     const columnName = req.params.ColumnName;
