@@ -100,6 +100,27 @@ router.post("/themxe", function (req, res, next) {
         .json({ success: false, message: "Lỗi thêm thông tin xe", error });
     });
 });
+
+//todo Xuất thông tin xe theo id mã xe
+router.get("/getxe/:maxe", function (req, res, next) {
+  const maxe = req.params.maxe; // Lấy MAXE từ tham số đường dẫn
+
+  sql
+    .getxe(maxe)
+    .then((result) => {
+      if (result.length > 0) {
+        res.json(result[0]); // Chỉ xuất ra dữ liệu của phần tử đầu tiên trong kết quả
+      } else {
+        res
+          .status(404)
+          .json({ error: "Không tìm thấy thông tin XE với Maxe " + maxe });
+      }
+    })
+    .catch((error) => {
+      console.log("Lỗi Tải Dữ Liệu Xe: " + error);
+      res.status(500).json({ error: "Lỗi Tải Dữ Liệu xe" });
+    });
+});
 //* Sửa thông tin xe
 router.put("/suaxe/:MaXe", function (req, res, next) {
   const MaXe = parseInt(req.params.MaXe);
