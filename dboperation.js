@@ -144,6 +144,25 @@ async function layxe() {
     sql.close();
   }
 }
+//Hàm xuất thông tin xe theo id
+async function getxe(maxe) {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("maxe", sql.Int, maxe)
+      .query(
+        "SELECT * FROM [dbo].[XE] WHERE [maxe] = @maxe"
+      );
+
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu Contact: " + error);
+    throw error;
+  } finally {
+    sql.close();
+  }
+}
 //todo: Thêm thông tin xe
 async function themxe(MaXe, TenXe, MaLoaiXe, BienSo, GhiChu, Anh) {
   try {
@@ -393,4 +412,5 @@ module.exports = {
   getgia: getgia,
   getcontact:getcontact,
   getThongTinXe:getThongTinXe,
+getxe:getxe,
 };
