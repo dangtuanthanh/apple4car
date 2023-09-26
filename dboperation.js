@@ -279,7 +279,7 @@ let transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'dangtuanthanh265@gmail.com',
-    pass: process.env.EMAIL_PASSWORD // Sử dụng biến môi trường EMAIL_PASSWORD
+    pass: 'bmjaspfmsgqhpmhp' // Sử dụng biến môi trường EMAIL_PASSWORD
   }
 });
 // Hàm gửi thông tin của người dùng
@@ -395,6 +395,63 @@ async function getThongTinXe() {
 }
 
 
+//Kiểm tra xác thực email
+async function CheckEmail(Email) {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("Email", sql.VarChar, Email.Email)
+      .query(
+        "SELECT Email FROM KhachHang WHERE Email = @Email"
+      );
+
+    if (result.recordset.length === 0) {
+      return { success: false, message: "Email này chưa được đăng ký!" };
+    } else {
+      sendMail(result.recordset[0].Email)
+    }
+  } catch (error) {
+    console.log("Lỗi khi kiểm tra email " + error);
+  } finally {
+    sql.close();
+  }
+}
+//Hàm gửi email
+var randomNumber = Math.floor(Math.random() * 9000) + 1000;
+function sendMail(emailNguoiDung){
+  let mailOptions = {
+    from: 'dangtuanthanh265@gmail.com',
+    to: `${emailNguoiDung}`,
+    subject: `Mã xác nhận cho email ${emailNguoiDung}`,
+    text: `Chào bạn, đây là mã xác nhận:  ${randomNumber}`
+    
+  };
+  transporter.sendMail(mailOptions, function(error, info) {
+    if (error) {
+      throw error;
+    } else {
+
+      console.log('Email đã được gửi: ' + info.response);
+    }
+  });
+}
+
+async function xacnhanma(maxacnhan) {
+  try {
+    if (parseInt(maxacnhan.ma) === randomNumber){
+      randomNumber = Math.floor(Math.random() * 9000) + 1000;
+      return { success: true, message: "Xác nhận thành công !" };
+    }else {
+      return { success: false, message: "Mã xác thực không hợp lệ !" };
+    }
+  } catch (error) {
+    console.log("Lỗi khi kiểm tra mã xác nhận " + error);
+  } finally {
+    sql.close();
+  }
+}
+
 module.exports = {
   layxe: layxe,
   layuser: layuser,
@@ -413,4 +470,6 @@ module.exports = {
   getcontact:getcontact,
   getThongTinXe:getThongTinXe,
 getxe:getxe,
+CheckEmail:CheckEmail,
+xacnhanma:xacnhanma,
 };
