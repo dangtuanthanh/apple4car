@@ -144,25 +144,7 @@ async function layxe() {
     sql.close();
   }
 }
-//Hàm xuất thông tin xe theo id
-async function getxe(maxe) {
-  try {
-    let pool = await sql.connect(config);
-    let result = await pool
-      .request()
-      .input("maxe", sql.Int, maxe)
-      .query(
-        "SELECT * FROM [dbo].[XE] WHERE [maxe] = @maxe"
-      );
 
-    return result.recordset;
-  } catch (error) {
-    console.log("Lỗi Tải Dữ Liệu Contact: " + error);
-    throw error;
-  } finally {
-    sql.close();
-  }
-}
 //todo: Thêm thông tin xe
 async function themxe(MaXe, TenXe, MaLoaiXe, BienSo, GhiChu, Anh) {
   try {
@@ -393,6 +375,44 @@ async function getThongTinXe() {
     sql.close();
   }
 }
+//user theo idid
+async function getuser(IDUsers) {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("IDUsers", sql.Int, IDUsers)
+      .query(
+        "SELECT * FROM [dbo].[users] WHERE [IDUsers] = @IDUsers"
+      );
+
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu Contact: " + error);
+    throw error;
+  } finally {
+    sql.close();
+  }
+}
+//xe theo mã xe
+async function getxe(maxe) {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("maxe", sql.Int, maxe)
+      .query(
+        "SELECT * FROM [dbo].[XE] WHERE [maxe] = @maxe"
+      );
+
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu Contact: " + error);
+    throw error;
+  } finally {
+    sql.close();
+  }
+}
 
 
 //Kiểm tra xác thực email
@@ -469,6 +489,7 @@ module.exports = {
   getgia: getgia,
   getcontact:getcontact,
   getThongTinXe:getThongTinXe,
+  getuser:getuser
 getxe:getxe,
 CheckEmail:CheckEmail,
 xacnhanma:xacnhanma,
