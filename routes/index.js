@@ -286,4 +286,34 @@ router.get('/gia/:numberOfDays/:maLoaiXe', async (req, res) => {
   }
 });
 
+// Kiểm tra email cho chức năng quên mật khẩu
+router.post("/email", function (req, res, next) {
+  // Lấy dữ liệu được gửi đến từ client
+  const data = req.body;
+  // Thực hiện thêm dữ liệu vào SQL
+  sql
+    .CheckEmail(data)
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Đã xảy ra lỗi khi kiểm tra:  ", error });
+    });
+});
+
+//Mã xác nhận quên mật khẩu:
+router.post("/xacnhanma", function (req, res, next) {
+  // Lấy dữ liệu được gửi đến từ client
+  const data = req.body;
+  // Thực hiện thêm dữ liệu vào SQL
+  sql
+    .xacnhanma(data)
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Đã xảy ra lỗi khi kiểm tra:  ", error });
+    });
+});
+
 module.exports = router;
