@@ -38,7 +38,7 @@ const config = {
     enableArithAbort: true,
     instancename: "",
   },
-  port: 2651
+  port: 1433
    //tìm port bằng cách truy cập sql server configuration manager trong máy -> sql server network configuration -> Protocols for SQLEXPRESS -> Enabled phần TCP/IP ->TCP/IP -> IP Adress-> IPAll ->lấy thông số TCP Dynamic Port
 };
 
