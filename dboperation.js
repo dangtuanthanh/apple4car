@@ -489,7 +489,7 @@ module.exports = {
   getgia: getgia,
   getcontact:getcontact,
   getThongTinXe:getThongTinXe,
-  getuser:getuser
+  getuser:getuser,
 getxe:getxe,
 CheckEmail:CheckEmail,
 xacnhanma:xacnhanma,
