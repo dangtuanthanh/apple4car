@@ -336,5 +336,82 @@ router.post("/xacnhanma", function (req, res, next) {
       res.status(500).json({ error: "Đã xảy ra lỗi khi kiểm tra:  ", error });
     });
 });
+//Thêm bài viết user
+router.post("/dangbai", function (req, res, next) {
+  // Lấy dữ liệu được gửi đến từ client
+  const data = req.body;
+  const sessionID = req.headers.ss;
+  // Thực hiện thêm dữ liệu vào SQL
+  sql
+    .dangbai(data,sessionID, res)
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Đã xảy ra lỗi khi thêm bài viết:  ", error });
+    });
+});
 
+router.get("/laybaiviet", function (req, res, next) {
+  sql.laybaiviet().then((result) => {
+    res.json(result);
+  });
+});
+// Xóa bài viết từ trang Admin
+router.delete("/xoabaiviet/:MaBai", function (req, res, next) {
+  const MaBai = parseInt(req.params.MaBai);
+  sql
+    .xoabaiviet(MaBai)
+    .then(() => {
+      res
+        .status(200)
+        .json({ success: true, message: "Xóa thông tin thành công" });
+    })
+    .catch((error) => {
+      res
+        .status(500)
+        .json({ success: false, message: "Lỗi xóa thông tin ", error });
+    });
+});
+
+//todo : lấy bài viết theo id
+router.get("/lay1baiviet/:MaBai", function (req, res, next) {
+  const MaBai = req.params.MaBai; // Lấy id contact từ tham số đường dẫn
+
+  sql
+    .lay1baiviet(MaBai)
+    .then((result) => {
+      if (result.length > 0) {
+        res.json(result[0]); // Chỉ xuất ra dữ liệu của phần tử đầu tiên trong kết quả
+      } else {
+        res
+          .status(404)
+          .json({ error: "Không tìm thấy thông tin với id " + MaBai });
+      }
+    })
+    .catch((error) => {
+      console.log("Lỗi Tải Dữ Liệu: " + error);
+      res.status(500).json({ error: "Lỗi Tải Dữ Liệu" });
+    });
+});
+
+//* cập nhật trạng thái duyệt bài viết
+router.put("/duyetbai/:MaBai", function (req, res, next) {
+  const MaBai = parseInt(req.params.MaBai);
+
+  const TrangThai = req.body.TrangThai;
+
+  sql
+    .duyetbai(MaBai,TrangThai)
+    .then(() => {
+      res
+        .status(200)
+        .json({ success: true, message: "Sửa thông tin thành công" });
+    })
+    .catch((error) => {
+      res
+        .status(500)
+        .json({ success: false, message: "Lỗi sửa thông tin", error });
+    });
+});
 module.exports = router;
