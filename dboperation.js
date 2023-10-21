@@ -3,28 +3,37 @@ const sql = require("mssql"); //tải module mssql
 const bcrypt = require("bcrypt"); // dùng để mã hoá mật khẩu
 const nodemailer = require('nodemailer');//dùng để gửi email
 require('dotenv').config(); // đọc biến môi trường
-//const { format } = require('date-fns'); //ép định dạng cho ngày tháng năm
-//const argon2 = require('argon2');
-//const bcrypt = require('bcryptjs');
-//const crypto = require('crypto');
 
+
+// Tạo một pool kết nối
+const pool = new sql.ConnectionPool(config);
+// Kết nối đến cơ sở dữ liệu
+async function connectToDatabase() {
+  try {
+    await pool.connect();
+    console.log("Đã kết nối tới cơ sở dữ liệu");
+  } catch (error) {
+    console.log("Lỗi kết nối cơ sở dữ liệu: " + error);
+  }
+}
+
+// Khi ứng dụng bắt đầu, kết nối tới cơ sở dữ liệu
+connectToDatabase();
 //xử lý tải dữ liệu xe
 async function layuser() {
   try {
-    let pool = await sql.connect(config);
+    
     let res = await pool.request().query("SELECT * FROM users");
     return res.recordset;
   } catch (error) {
     console.log("Lỗi Tải Dữ Liệu User :" + error);
-  } finally {
-    sql.close();
   }
 }
 
 // Hàm đăng ký
 async function dangKy(data) {
   try {
-    let pool = await sql.connect(config);
+    
     // Mã hóa mật khẩu
     //const hashedPassword = hashPassword(data.Pass);
     const hashedPassword = await bcrypt.hash(data.Pass, 10);
@@ -37,15 +46,13 @@ async function dangKy(data) {
     return res.recordsets;
   } catch (error) {
     console.log("Lỗi khi đăng ký: " + error);
-  } finally {
-    sql.close();
   }
 }
 
 // Hàm đăng nhập
 async function dangNhap(data, res) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .query("SELECT * FROM users WHERE UserName = '" + data.UserName + "'");
@@ -70,12 +77,14 @@ async function dangNhap(data, res) {
         const currentTime2 = Date.now();
         const threeDaysLater = new Date(currentTime2 + (3 * 24 * 60 * 60 * 1000));
         await sql.query`UPDATE users SET SessionID = ${sessionID}, TimeSession = ${threeDaysLater} WHERE IDUsers = ${userID}`;
+        console.log(matchedUser.Quyen);
         //res.cookie('ss', sessionID, { maxAge: 3600000, httpOnly: true });
         //res.cookie('ss2', 'aaaa', { maxAge: oneDay, httpOnly: true, secure: false });
         return {
           success: true,
           message: "Đăng nhập thành công!",
           cookieValue: sessionID,
+          quyen: matchedUser.Quyen
         };
       } else {
         // Mật khẩu không khớp
@@ -97,15 +106,13 @@ async function dangNhap(data, res) {
       success: false,
       message: "Đã xảy ra lỗi trong quá trình đăng nhập!",
     };
-  } finally {
-    sql.close();
   }
 }
 
 //hàm lấy thông tin từ sessionID
 async function SessionID(sessionID) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("SessionID", sql.NVarChar, sessionID.sessionID)
@@ -127,28 +134,24 @@ async function SessionID(sessionID) {
     return result.recordset;
   } catch (error) {
     console.log("Lỗi khi kiểm tra SessionID: " + error);
-  } finally {
-    sql.close();
   }
 }
 
 //todo: lấy thông tin xe
 async function layxe() {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool.request().query("SELECT * FROM xe");
     return result.recordset;
   } catch (error) {
     console.log("Lỗi Tải Dữ Liệu Xe: " + error);
-  } finally {
-    sql.close();
   }
 }
 
 //todo: Thêm thông tin xe
 async function themxe(MaXe, TenXe, MaLoaiXe, BienSo, GhiChu, Anh) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("MaXe", sql.Int, MaXe)
@@ -166,7 +169,7 @@ async function themxe(MaXe, TenXe, MaLoaiXe, BienSo, GhiChu, Anh) {
 //todo: sửa thông tin xe
 async function suaxe(MaXe, TenXe, MaLoaiXe, BienSo, GhiChu, Anh) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("MaXe", sql.Int, MaXe)
@@ -187,7 +190,7 @@ async function suaxe(MaXe, TenXe, MaLoaiXe, BienSo, GhiChu, Anh) {
 //todo: Xóa thông tin xe
 async function xoaxe(MaXe) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("MaXe", sql.Int, MaXe)
@@ -202,7 +205,7 @@ async function xoaxe(MaXe) {
 //hàm thêm, sửa ảnh xe
 async function themSuaAnhXe(MaXe, DuongDanAnh) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("MaXe", sql.Int, MaXe)
@@ -220,7 +223,7 @@ async function themSuaAnhXe(MaXe, DuongDanAnh) {
 //hàm xoá user
 async function xoauser(IDUsers) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("IDUsers", sql.Int, IDUsers)
@@ -239,7 +242,7 @@ async function xoauser(IDUsers) {
 
 async function suaThongTinUser(IDUsers, HoTen, Quyen, UserName) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("IDUsers", sql.Int, IDUsers)
@@ -251,8 +254,6 @@ async function suaThongTinUser(IDUsers, HoTen, Quyen, UserName) {
   } catch (error) {
     console.log("Lỗi khi sửa thông tin user: " + error);
     throw error;
-  } finally {
-    sql.close();
   }
 }
 
@@ -267,7 +268,7 @@ let transporter = nodemailer.createTransport({
 // Hàm gửi thông tin của người dùng
 async function thongtin(data) {
   try {
-    let pool = await sql.connect(config);
+    
     let mailOptions = {
       from: 'dangtuanthanh265@gmail.com',
       to: 'cuathanhday265@gmail.com',
@@ -299,14 +300,12 @@ async function thongtin(data) {
   } catch (error) {
     console.log("Lỗi khi sửa thông tin user: " + error);
     throw error;
-  } finally {
-    sql.close();
   }
 }
 // Hàm xuất thông tin theo idid
 async function contact(idContact) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("idContact", sql.Int, idContact)
@@ -318,20 +317,16 @@ async function contact(idContact) {
   } catch (error) {
     console.log("Lỗi Tải Dữ Liệu Contact: " + error);
     throw error;
-  } finally {
-    sql.close();
   }
 }
 // Hàm xuất thông tin liên hệ
 async function getcontact() {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool.request().query("SELECT * FROM Thongtin");
     return result.recordset;
   } catch (error) {
     console.log("Lỗi Tải Dữ Liệu Xe: " + error);
-  } finally {
-    sql.close();
   }
 }
 // Hàm tính toán giá thuê xe dựa trên số ngày thuê
@@ -366,19 +361,17 @@ async function getgia(numberOfDays, maLoaiXe) {
 //todo Hàm xử lý riêng để lấy thông tin xe và giá dịch vụ
 async function getThongTinXe() {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool.request().query("SELECT XE.*, DICHVU.Gia   FROM XE INNER JOIN DICHVU ON XE.MaLoaiXe = DICHVU.MaLoaiXe");
     return result.recordset;
   } catch (error) {
     console.log("Lỗi Tải Dữ Liệu Xe: " + error);
-  } finally {
-    sql.close();
   }
 }
 //user theo idid
 async function getuser(IDUsers) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("IDUsers", sql.Int, IDUsers)
@@ -390,14 +383,12 @@ async function getuser(IDUsers) {
   } catch (error) {
     console.log("Lỗi Tải Dữ Liệu Contact: " + error);
     throw error;
-  } finally {
-    sql.close();
   }
 }
 //xe theo mã xe
 async function getxe(maxe) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("maxe", sql.Int, maxe)
@@ -409,8 +400,6 @@ async function getxe(maxe) {
   } catch (error) {
     console.log("Lỗi Tải Dữ Liệu Contact: " + error);
     throw error;
-  } finally {
-    sql.close();
   }
 }
 
@@ -418,7 +407,7 @@ async function getxe(maxe) {
 //Kiểm tra xác thực email
 async function CheckEmail(Email) {
   try {
-    let pool = await sql.connect(config);
+    
     let result = await pool
       .request()
       .input("Email", sql.VarChar, Email.Email)
@@ -433,8 +422,6 @@ async function CheckEmail(Email) {
     }
   } catch (error) {
     console.log("Lỗi khi kiểm tra email " + error);
-  } finally {
-    sql.close();
   }
 }
 //Hàm gửi email
@@ -467,11 +454,163 @@ async function xacnhanma(maxacnhan) {
     }
   } catch (error) {
     console.log("Lỗi khi kiểm tra mã xác nhận " + error);
-  } finally {
-    sql.close();
   }
 }
 
+//todo: Thêm bài viết
+async function dangbai(data,sessionID) {
+  try {
+    
+    let resultsessionID = await pool
+      .request()
+      .input("SessionID", sql.NVarChar, sessionID)
+      .query(
+        "SELECT IDUsers, TimeSession FROM users WHERE SessionID = @SessionID"
+      );
+
+    if (resultsessionID.recordset.length === 0) {
+      return { success: false, message: "Bạn hãy đăng nhập lại!" };
+    }
+    const timeSession = resultsessionID.recordset[0].TimeSession;
+    const currentTime = new Date();
+
+    if (currentTime > timeSession) {
+      return { success: false, message: "Bạn hãy đăng nhập lại!!" };
+    }
+
+
+    let result = await pool
+      .request()
+      .input("MaBai", sql.Int, data.MaBai)
+      .input("TenBaiDang", sql.NVarChar, data.TenBaiDang)
+      .input("NoiDung", sql.NVarChar, data.NoiDung)
+      .input("HinhAnh", sql.NVarChar, data.HinhAnh)
+      .input("BienSo", sql.VarChar, data.BienSo)
+      .input("GiaThue", sql.Float, data.GiaThue)
+      .input("DiaDiemCoXe", sql.NVarChar, data.DiaDiemCoXe)
+      .input("IDUsers", sql.Int, resultsessionID.recordset[0].IDUsers)
+      .execute("ThemBaiViet");
+    return { success: true, message: "Thêm Bài Viết Thành Công" };
+  } catch (error) {
+    console.log("Lỗi khi thêm bài viết: " + error);
+  }
+}
+
+//xử lý tải bải viết
+async function laybaiviet() {
+  try {
+    
+    let res = await pool.request().query("SELECT * FROM BaiDang");
+    return res.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu Bài Viết :" + error);
+  }
+}
+
+//todo: Xóa bài viết ở trang admin
+async function xoabaiviet(MaBaiViet) {
+  try {
+    
+    let result = await pool
+      .request()
+      .input("MaBai", sql.Int, MaBaiViet)
+      .query(`DELETE FROM BaiDang WHERE MaBai = ${MaBaiViet}`)
+    return result;
+  } catch (error) {
+    console.log("Lỗi khi xóa thông tin: " + error);
+    throw error;
+  }
+}
+
+// Hàm get 1 bài viết theo id
+async function lay1baiviet(MaBai) {
+  try {
+    
+    let result = await pool
+      .request()
+      .input("MaBai", sql.Int, MaBai)
+      .query(
+        "SELECT * FROM BaiDang WHERE MaBai = @MaBai"
+      );
+
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu  " + error);
+    throw error;
+  }
+}
+
+async function duyetbai(MaBai, TrangThai) {
+  try {
+    
+    let result = await pool
+      .request()
+      .input("MaBai", sql.Int, MaBai)
+      .input("TrangThai", sql.Bit, TrangThai)
+      .query("UPDATE BaiDang SET TrangThai = @TrangThai WHERE MaBai = @MaBai");
+    return result;
+  } catch (error) {
+    console.log("Lỗi khi sửa thông tin " + error);
+    throw error;
+  }
+}
+
+//todo: Hàm hiển thị bài viết theo user đăng nhập
+async function layIDUsersBangSessionID(sessionID) {
+  try {
+    let result = await pool
+      .request()
+      .input('SessionID', sql.NVarChar, sessionID)
+      .query('SELECT IDUsers FROM users WHERE SessionID = @SessionID');
+
+    return result;
+  } catch (error) {
+    console.log('Lỗi khi lấy IDUsers từ SessionID: ' + error);
+    throw error;
+  }
+}
+
+async function layDanhSachBaiViet(IDUsers) {
+  try {
+    let result = await pool
+      .request()
+      .input('IDUsers', sql.Int, IDUsers)
+      .query('SELECT * FROM BaiDang WHERE IDUsers = @IDUsers AND TrangThai = 1');
+
+    return result;
+  } catch (error) {
+    console.log('Lỗi khi lấy danh sách bài viết: ' + error);
+    throw error;
+  }
+}
+
+
+// Kiểm tra tồn tại bài viết và quyền sở hữu
+async function kiemTraBaiVietCuaNguoiDung(IDUsers, MaBai) {
+  const query = `SELECT * FROM BaiViet WHERE IDUsers = @IDUsers AND MaBai = @MaBai`;
+  const request = new sql.Request(pool);
+  request.input('IDUsers', sql.Int, IDUsers);
+  request.input('MaBai', sql.Int, MaBai);
+  const result = await request.query(query);
+  return result.recordset[0];
+}
+
+// Cập nhật nội dung bài viết
+async function capNhatNoiDungBaiViet(MaBai, updatedContent) {
+  const query = `UPDATE BaiViet SET NoiDung = @updatedContent WHERE MaBai = @MaBai`;
+  const request = new sql.Request(pool);
+  request.input('updatedContent', sql.NVarChar, updatedContent);
+  request.input('MaBai', sql.Int, MaBai);
+  await request.query(query);
+}
+
+// Xóa bài viết
+async function xoaBaiViet(MaBai) {
+  const query = `DELETE FROM BaiViet WHERE MaBai = @MaBai`;
+  const request = new sql.Request(pool);
+  request.input('MaBai', sql.Int, MaBai);
+  await request.query(query);
+}
 module.exports = {
   layxe: layxe,
   layuser: layuser,
@@ -493,4 +632,14 @@ module.exports = {
 getxe:getxe,
 CheckEmail:CheckEmail,
 xacnhanma:xacnhanma,
+dangbai:dangbai,
+laybaiviet:laybaiviet,
+xoabaiviet:xoabaiviet,
+lay1baiviet:lay1baiviet,
+duyetbai:duyetbai,
+layDanhSachBaiViet:layDanhSachBaiViet,
+layIDUsersBangSessionID:layIDUsersBangSessionID,
+kiemTraBaiVietCuaNguoiDung:kiemTraBaiVietCuaNguoiDung,
+xoaBaiViet:xoaBaiViet,
+capNhatNoiDungBaiViet:capNhatNoiDungBaiViet,
 };

@@ -336,5 +336,157 @@ router.post("/xacnhanma", function (req, res, next) {
       res.status(500).json({ error: "Đã xảy ra lỗi khi kiểm tra:  ", error });
     });
 });
+//Thêm bài viết user
+router.post("/dangbai", function (req, res, next) {
+  // Lấy dữ liệu được gửi đến từ client
+  const data = req.body;
+  const sessionID = req.headers.ss;
+  // Thực hiện thêm dữ liệu vào SQL
+  sql
+    .dangbai(data,sessionID, res)
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Đã xảy ra lỗi khi thêm bài viết:  ", error });
+    });
+});
+
+router.get("/laybaiviet", function (req, res, next) {
+  sql.laybaiviet().then((result) => {
+    res.json(result);
+  });
+});
+// Xóa bài viết từ trang Admin
+router.delete("/xoabaiviet/:MaBai", function (req, res, next) {
+  const MaBai = parseInt(req.params.MaBai);
+  sql
+    .xoabaiviet(MaBai)
+    .then(() => {
+      res
+        .status(200)
+        .json({ success: true, message: "Xóa thông tin thành công" });
+    })
+    .catch((error) => {
+      res
+        .status(500)
+        .json({ success: false, message: "Lỗi xóa thông tin ", error });
+    });
+});
+
+//todo : lấy bài viết theo id
+router.get("/lay1baiviet/:MaBai", function (req, res, next) {
+  const MaBai = req.params.MaBai; // Lấy id contact từ tham số đường dẫn
+
+  sql
+    .lay1baiviet(MaBai)
+    .then((result) => {
+      if (result.length > 0) {
+        res.json(result[0]); // Chỉ xuất ra dữ liệu của phần tử đầu tiên trong kết quả
+      } else {
+        res
+          .status(404)
+          .json({ error: "Không tìm thấy thông tin với id " + MaBai });
+      }
+    })
+    .catch((error) => {
+      console.log("Lỗi Tải Dữ Liệu: " + error);
+      res.status(500).json({ error: "Lỗi Tải Dữ Liệu" });
+    });
+});
+
+//* cập nhật trạng thái duyệt bài viết
+router.put("/duyetbai/:MaBai", function (req, res, next) {
+  const MaBai = parseInt(req.params.MaBai);
+
+  const TrangThai = req.body.TrangThai;
+
+  sql
+    .duyetbai(MaBai,TrangThai)
+    .then(() => {
+      res
+        .status(200)
+        .json({ success: true, message: "Sửa thông tin thành công" });
+    })
+    .catch((error) => {
+      res
+        .status(500)
+        .json({ success: false, message: "Lỗi sửa thông tin", error });
+    });
+});
+//todo: Hiển thị bài viết của người dùng đã đăng nhập
+// Route GET '/baiviet' để lấy danh sách bài viết của người dùng đăng nhập
+router.get('/baiviet', function(req, res, next) {
+  const sessionID = req.headers.ss;
+
+  // Kiểm tra sessionID và lấy IDUsers tương ứng
+  sql
+    .layIDUsersBangSessionID(sessionID)
+    .then(result => {
+      const IDUsers = result.recordset[0].IDUsers;
+
+      // Lấy danh sách các bài viết của người dùng dựa trên IDUsers
+      return sql.layDanhSachBaiViet(IDUsers);
+    })
+    .then(result => {
+      // Trả về danh sách bài viết
+      res.status(200).json(result.recordset);
+    })
+    .catch(error => {
+      res.status(500).json({ error: 'Đã xảy ra lỗi khi lấy danh sách bài viết', error });
+    });
+});
+
+//Todo: Xóa, Sửa bài viết theo id user
+// Xử lý PUT '/baiviet/:id'
+router.put('/baiviet/:id', async (req, res) => {
+  try {
+    const { sessionID } = req.headers;
+    const { id: MaBai } = req.params;
+    const { updatedContent } = req.body;
+
+    // Kiểm tra tồn tại bài viết và quyền sở hữu
+    const IDUsers = await sql.layIDUsersBangSessionID(sessionID);
+    const baiViet = await sql.kiemTraBaiVietCuaNguoiDung(IDUsers, MaBai);
+
+    if (!baiViet) {
+      return res.status(404).json({ error: 'Bài viết không tồn tại hoặc không thuộc về bạn' });
+    }
+
+    // Cập nhật nội dung bài viết
+    await sql.capNhatNoiDungBaiViet(MaBai, updatedContent);
+
+    res.status(200).json({ message: 'Cập nhật nội dung bài viết thành công' });
+  } catch (error) {
+    console.log('Lỗi khi xử lý yêu cầu PUT: ' + error);
+    res.status(500).json({ error: 'Đã xảy ra lỗi trong quá trình xử lý yêu cầu' });
+  }
+});
+
+// Xử lý DELETE '/baiviet/:id'
+router.delete('/baiviet/:id', async (req, res) => {
+  try {
+    const { sessionID } = req.headers;
+    const { id: MaBai } = req.params;
+
+    // Kiểm tra tồn tại bài viết và quyền sở hữu
+    const IDUsers = await sql.layIDUsersBangSessionID(sessionID);
+    const baiViet = await sql.kiemTraBaiVietCuaNguoiDung(IDUsers, MaBai);
+
+    if (!baiViet) {
+      return res.status(404).json({ error: 'Bài viết không tồn tại hoặc không thuộc về bạn' });
+    }
+
+    // Xóa bài viết
+    await sql.xoaBaiViet(MaBai);
+
+    res.status(200).json({ message: 'Xóa bài viết thành công' });
+  } catch (error) {
+    console.log('Lỗi khi xử lý yêu cầu DELETE: ' + error);
+    res.status(500).json({ error: 'Đã xảy ra lỗi trong quá trình xử lý yêu cầu' });
+  }
+});
 
 module.exports = router;
+
+
