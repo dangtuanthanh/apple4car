@@ -465,7 +465,24 @@ router.put('/baiviet/:id', async (req, res) => {
 
 
 
+router.get('/timkiem/:TenBang/:ColumnName/:Search', function (req, res, next) {
+  try {
+    const TenBang = req.params.TenBang;
+    const columnName = req.params.ColumnName;
+    const Search = req.params.Search;
+    const encodedSearch = encodeURIComponent(Search); // Mã hóa chuỗi tìm kiếm( mã hoá cả tiếng Việt)
 
+    sql.searchData(TenBang,columnName,encodedSearch ).then((result) => {//gọi hàm searchData
+      res.status(200).json(result);
+    }).catch((error) => {
+      console.log(error);
+    });;
+
+  } catch (error) {
+    console.log("Error: " + error.message);
+    res.sendStatus(500);
+  }
+});
 module.exports = router;
 
 
