@@ -341,10 +341,10 @@ async function getgia(numberOfDays, maLoaiXe) {
       ORDER BY NgayThue DESC
     `;
 
-    const request = new pool.Request();
-    request.input('MaLoaiXe', sql.Int, maLoaiXe);
-
-    const result = await request.query(query);
+    const result = await pool
+      .request()
+      .input('MaLoaiXe', sql.Int, maLoaiXe)
+      .query(query);
 
     // Tính giá thuê dựa trên số ngày thuê
     const gia = result.recordset[0].Gia * numberOfDays;
