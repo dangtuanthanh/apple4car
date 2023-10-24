@@ -333,10 +333,6 @@ async function getcontact() {
 // Hàm xử lý lấy giá thuê xe dựa trên số ngày thuê và mã loại xe
 async function getgia(numberOfDays, maLoaiXe) {
   try {
-    // Kết nối cơ sở dữ liệu
-    //Chỗ này chưa đúng chỗ sql.
-    await sql.connect(config);
-
     // Truy vấn giá thuê xe dựa trên số ngày thuê và mã loại xe
     const query = `
       SELECT Gia
@@ -345,7 +341,7 @@ async function getgia(numberOfDays, maLoaiXe) {
       ORDER BY NgayThue DESC
     `;
 
-    const request = new sql.Request();
+    const request = new pool.Request();
     request.input('MaLoaiXe', sql.Int, maLoaiXe);
 
     const result = await request.query(query);
@@ -588,30 +584,31 @@ async function layDanhSachBaiViet(IDUsers) {
 
 // Kiểm tra tồn tại bài viết và quyền sở hữu
 async function kiemTraBaiVietCuaNguoiDung(IDUsers, MaBai) {
-  const query = `SELECT * FROM BaiViet WHERE IDUsers = @IDUsers AND MaBai = @MaBai`;
-  const request = new sql.Request(pool);
-  request.input('IDUsers', sql.Int, IDUsers);
-  request.input('MaBai', sql.Int, MaBai);
-  const result = await request.query(query);
-  return result.recordset[0];
+ 
+ let result = await pool
+      .request()
+      .input('MaBai', sql.int, MaBai)
+      .input('IDUsers', sql.int, IDUsers)
+      .query('SELECT * FROM BaiViet WHERE IDUsers = @IDUsers AND MaBai = @MaBai');
+
+    
+  return result.recordset;
 }
 
 // Cập nhật nội dung bài viết
 async function capNhatNoiDungBaiViet(MaBai, updatedContent) {
   const query = `UPDATE BaiViet SET NoiDung = @updatedContent WHERE MaBai = @MaBai`;
-  const request = new sql.Request(pool);
-  request.input('updatedContent', sql.NVarChar, updatedContent);
-  request.input('MaBai', sql.Int, MaBai);
-  await request.query(query);
+   let result = await pool
+      .request()
+      .input('MaBai', sql.int, MaBai)
+      .input('updatedContent', sql.NVarChar, updatedContent)
+      .query(query);
+
+
+  return ('Sửa thành công');
+    
 }
 
-// Xóa bài viết
-async function xoaBaiViet(MaBai) {
-  const query = `DELETE FROM BaiViet WHERE MaBai = @MaBai`;
-  const request = new sql.Request(pool);
-  request.input('MaBai', sql.Int, MaBai);
-  await request.query(query);
-}
 module.exports = {
   layxe: layxe,
   layuser: layuser,
@@ -641,6 +638,6 @@ duyetbai:duyetbai,
 layDanhSachBaiViet:layDanhSachBaiViet,
 layIDUsersBangSessionID:layIDUsersBangSessionID,
 kiemTraBaiVietCuaNguoiDung:kiemTraBaiVietCuaNguoiDung,
-xoaBaiViet:xoaBaiViet,
+
 capNhatNoiDungBaiViet:capNhatNoiDungBaiViet,
 };
