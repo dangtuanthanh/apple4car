@@ -416,7 +416,7 @@ router.put("/duyetbai/:MaBai", function (req, res, next) {
 });
 //todo: Hiển thị bài viết của người dùng đã đăng nhập
 // Route GET '/baiviet' để lấy danh sách bài viết của người dùng đăng nhập
-router.get('/baiviet', function(req, res, next) {
+router.get('/laybaivietdaduocduyet', function(req, res, next) {
   const sessionID = req.headers.ss;
 
   // Kiểm tra sessionID và lấy IDUsers tương ứng
@@ -463,29 +463,8 @@ router.put('/baiviet/:id', async (req, res) => {
   }
 });
 
-// Xử lý DELETE '/baiviet/:id'
-router.delete('/baiviet/:id', async (req, res) => {
-  try {
-    const { sessionID } = req.headers;
-    const { id: MaBai } = req.params;
 
-    // Kiểm tra tồn tại bài viết và quyền sở hữu
-    const IDUsers = await sql.layIDUsersBangSessionID(sessionID);
-    const baiViet = await sql.kiemTraBaiVietCuaNguoiDung(IDUsers, MaBai);
 
-    if (!baiViet) {
-      return res.status(404).json({ error: 'Bài viết không tồn tại hoặc không thuộc về bạn' });
-    }
-
-    // Xóa bài viết
-    await sql.xoaBaiViet(MaBai);
-
-    res.status(200).json({ message: 'Xóa bài viết thành công' });
-  } catch (error) {
-    console.log('Lỗi khi xử lý yêu cầu DELETE: ' + error);
-    res.status(500).json({ error: 'Đã xảy ra lỗi trong quá trình xử lý yêu cầu' });
-  }
-});
 
 module.exports = router;
 
