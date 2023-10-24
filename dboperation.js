@@ -76,7 +76,7 @@ async function dangNhap(data, res) {
         //thêm 3 ngày thời hạn
         const currentTime2 = Date.now();
         const threeDaysLater = new Date(currentTime2 + (3 * 24 * 60 * 60 * 1000));
-        await sql.query`UPDATE users SET SessionID = ${sessionID}, TimeSession = ${threeDaysLater} WHERE IDUsers = ${userID}`;
+        await pool.query`UPDATE users SET SessionID = ${sessionID}, TimeSession = ${threeDaysLater} WHERE IDUsers = ${userID}`;
         console.log(matchedUser.Quyen);
         //res.cookie('ss', sessionID, { maxAge: 3600000, httpOnly: true });
         //res.cookie('ss2', 'aaaa', { maxAge: oneDay, httpOnly: true, secure: false });
@@ -334,6 +334,7 @@ async function getcontact() {
 async function getgia(numberOfDays, maLoaiXe) {
   try {
     // Kết nối cơ sở dữ liệu
+    //Chỗ này chưa đúng chỗ sql.
     await sql.connect(config);
 
     // Truy vấn giá thuê xe dựa trên số ngày thuê và mã loại xe
