@@ -630,6 +630,25 @@ async function searchData(TenBang, columnName, Search) {
     throw error;
   }
 }
+async function searchData(TenBang, columnName, Search) {
+  try {
+    // Giải mã chuỗi tìm kiếm từ URL encoding
+    const decodedSearch = decodeURIComponent(Search);
+    let pool = await sql.connect(config);
+    const query = `SELECT * FROM ${TenBang} WHERE ${columnName} LIKE @Search`;
+    let res = await pool.request()
+      .input('Search', sql.NVarChar(50), `%${decodedSearch}%`)
+      .query(query);
+    if (res.recordset.length > 0) {
+      return res.recordset;
+    } else {
+      const errorMessage = `Không tìm thấy ${decodedSearch} trong cột ${columnName}`;
+      return { success: false, message: errorMessage };
+    }
+  } catch (error) {
+    throw error;
+  }
+}
 module.exports = {
   layxe: layxe,
   layuser: layuser,
@@ -659,6 +678,6 @@ duyetbai:duyetbai,
 layDanhSachBaiViet:layDanhSachBaiViet,
 layIDUsersBangSessionID:layIDUsersBangSessionID,
 kiemTraBaiVietCuaNguoiDung:kiemTraBaiVietCuaNguoiDung,
-
+searchData:searchData,
 capNhatNoiDungBaiViet:capNhatNoiDungBaiViet,
 };
