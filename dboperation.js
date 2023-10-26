@@ -227,8 +227,10 @@ async function xoauser(IDUsers) {
     let result = await pool
       .request()
       .input("IDUsers", sql.Int, IDUsers)
-      .query("DELETE FROM BaiDang WHERE IDUsers = @IDUsers")
-      .query("DELETE FROM users WHERE IDUsers = @IDUsers");
+      .query("DELETE FROM BaiDang WHERE IDUsers = @IDUsers");
+  result = await pool.request()
+  .input("IDUsers", sql.Int, IDUsers)
+  .query("DELETE FROM users WHERE IDUsers = @IDUsers");
 
     if (result.rowsAffected[0] === 0) {
       throw new Error("Không tìm thấy người dùng để xoá");
