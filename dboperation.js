@@ -652,6 +652,49 @@ async function searchData(TenBang, columnName, Search) {
     throw error;
   }
 }
+
+//Todo: Hàm xử lý hiển thị bài viết
+
+
+async function hienthibaiviet() {
+  try {
+    
+    let result = await pool.request().query(`
+    SELECT  b.[MaBai]
+      ,b.[TenBaiDang]
+      ,b.[NoiDung]
+      ,b.[HinhAnh]
+      ,b.[BienSo]
+      ,b.[GiaThue]
+      ,b.[DiaDiemCoXe]
+      ,u.[HoTen]
+    FROM BaiDang AS b
+    JOIN users AS u ON b.[IDUsers] = u.[IDUsers]
+    WHERE b.[TrangThai] = 1
+  `);
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu user: " + error);
+  }
+}
+
+async function layuserid(IDUsers) {
+  try {
+    
+    let result = await pool
+      .request()
+      .input("IDUsers", sql.Int, IDUsers)
+      .query(
+        "SELECT * FROM [dbo].[users] WHERE [IDUsers] = @IDUsers"
+      );
+
+    return result.recordset;
+  } catch (error) {
+    console.log("Lỗi Tải Dữ Liệu user: " + error);
+    throw error;
+  }
+}
+
 module.exports = {
   layxe: layxe,
   layuser: layuser,
@@ -683,4 +726,6 @@ layIDUsersBangSessionID:layIDUsersBangSessionID,
 kiemTraBaiVietCuaNguoiDung:kiemTraBaiVietCuaNguoiDung,
 searchData:searchData,
 capNhatNoiDungBaiViet:capNhatNoiDungBaiViet,
+  hienthibaiviet:hienthibaiviet,
+layuserid:layuserid,
 };
