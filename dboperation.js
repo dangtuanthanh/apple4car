@@ -500,7 +500,7 @@ async function dangbai(data,sessionID) {
 async function laybaiviet() {
   try {
     
-    let res = await pool.request().query("SELECT * FROM BaiDang");
+    let res = await pool.request().query("SELECT BaiDang.*, users.HoTen FROM BaiDang JOIN users ON BaiDang.IDUsers = users.IDUsers");
     return res.recordset;
   } catch (error) {
     console.log("Lỗi Tải Dữ Liệu Bài Viết :" + error);
