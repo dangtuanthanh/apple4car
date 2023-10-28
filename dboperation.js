@@ -499,7 +499,6 @@ async function dangbai(data,sessionID) {
 //xử lý tải bải viết
 async function laybaiviet() {
   try {
-    
     let res = await pool.request().query("SELECT BaiDang.*, users.HoTen FROM BaiDang JOIN users ON BaiDang.IDUsers = users.IDUsers");
     return res.recordset;
   } catch (error) {
@@ -530,7 +529,7 @@ async function lay1baiviet(MaBai) {
       .request()
       .input("MaBai", sql.Int, MaBai)
       .query(
-        "SELECT * FROM BaiDang WHERE MaBai = @MaBai"
+        "SELECT BaiDang.*, users.HoTen FROM BaiDang JOIN users ON BaiDang.IDUsers = users.IDUsers WHERE MaBai = @MaBai"
       );
 
     return result.recordset;
