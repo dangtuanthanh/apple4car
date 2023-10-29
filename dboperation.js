@@ -574,7 +574,7 @@ async function layDanhSachBaiViet(IDUsers) {
     let result = await pool
       .request()
       .input('IDUsers', sql.Int, IDUsers)
-      .query('SELECT * FROM BaiDang WHERE IDUsers = @IDUsers AND TrangThai = 1');
+      .query('SELECT * FROM BaiDang WHERE IDUsers = @IDUsers ');
 
     return result;
   } catch (error) {
