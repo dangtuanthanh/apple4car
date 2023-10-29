@@ -618,7 +618,7 @@ async function searchData(TenBang, columnName, Search) {
     // Giải mã chuỗi tìm kiếm từ URL encoding
     const decodedSearch = decodeURIComponent(Search);
     let pool = await sql.connect(config);
-    const query = `SELECT ${TenBang}.* , users.HoTen FROM BaiDang JOIN users ON BaiDang.IDUsers = users.IDUsers WHERE ${columnName} LIKE @Search`;
+    const query = `SELECT * FROM ${TenBang} WHERE ${columnName} LIKE @Search`;
     let res = await pool.request()
       .input('Search', sql.NVarChar(50), `%${decodedSearch}%`)
       .query(query);
