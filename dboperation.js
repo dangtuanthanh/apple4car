@@ -618,7 +618,7 @@ async function searchData(TenBang, columnName, Search) {
     // Giải mã chuỗi tìm kiếm từ URL encoding
     const decodedSearch = decodeURIComponent(Search);
     let pool = await sql.connect(config);
-    const query = `SELECT * FROM ${TenBang} WHERE ${columnName} LIKE @Search`;
+    const query = `SELECT ${TenBang}.* , users.HoTen FROM BaiDang JOIN users ON BaiDang.IDUsers = users.IDUsers WHERE ${columnName} LIKE @Search`;
     let res = await pool.request()
       .input('Search', sql.NVarChar(50), `%${decodedSearch}%`)
       .query(query);
@@ -632,25 +632,7 @@ async function searchData(TenBang, columnName, Search) {
     throw error;
   }
 }
-async function searchData(TenBang, columnName, Search) {
-  try {
-    // Giải mã chuỗi tìm kiếm từ URL encoding
-    const decodedSearch = decodeURIComponent(Search);
-    let pool = await sql.connect(config);
-    const query = `SELECT * FROM ${TenBang} WHERE ${columnName} LIKE @Search`;
-    let res = await pool.request()
-      .input('Search', sql.NVarChar(50), `%${decodedSearch}%`)
-      .query(query);
-    if (res.recordset.length > 0) {
-      return res.recordset;
-    } else {
-      const errorMessage = `Không tìm thấy ${decodedSearch} trong cột ${columnName}`;
-      return { success: false, message: errorMessage };
-    }
-  } catch (error) {
-    throw error;
-  }
-}
+
 
 //Todo: Hàm xử lý hiển thị bài viết
 
