@@ -264,8 +264,8 @@ async function suaThongTinUser(IDUsers, HoTen, Quyen, UserName) {
 let transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'dangtuanthanh265@gmail.com',
-    pass: 'bmjaspfmsgqhpmhp' // Sử dụng biến môi trường EMAIL_PASSWORD
+    user: 'abc@gmail.com',
+    pass:  '1234// Sử dụng biến môi trường EMAIL_PASSWORD
   }
 });
 // Hàm gửi thông tin của người dùng
@@ -273,8 +273,8 @@ async function thongtin(data) {
   try {
     
     let mailOptions = {
-      from: 'dangtuanthanh265@gmail.com',
-      to: 'cuathanhday265@gmail.com',
+      from: 'abc@gmail.com',
+      to: 'xyz@gmail.com',
       subject: 'Thông báo về việc có đơn thuê xe mới',
       text: `Chào bạn. Đã có đơn hàng mới. 
       Thông tin đơn hàng: 
